@@ -1,11 +1,11 @@
 
 package com.desafio21diasmultiplasapis.empresas.controllers;
-
-import java.util.ArrayList;
 import java.util.List;
-
+import javax.servlet.http.HttpServletResponse;
 import com.desafio21diasmultiplasapis.empresas.models.Empresa;
-
+import com.desafio21diasmultiplasapis.empresas.repositorio.EmpresaRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,43 +15,66 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class EmpresasController {    
+public class EmpresasController {       
+
+    @Autowired
+    private EmpresaRepo repo;
+
     @GetMapping("/empresas")
     public List<Empresa> index(){
-        List<Empresa> empresas = new ArrayList<Empresa>();
-        empresas.add(new Empresa());
-        empresas.add(new Empresa());
-        empresas.add(new Empresa());
-        empresas.add(new Empresa());
-        empresas.add(new Empresa());
-        empresas.add(new Empresa());
+        List<Empresa> empresas = (List<Empresa>) repo.findAll();
         return empresas;
     }
 
+
     @GetMapping("/empresas/{id}")
-    public Empresa show(@PathVariable int id)
+    public ResponseEntity<Empresa> show(@PathVariable int id)
     {
-        Empresa empresa = new Empresa();
-        empresa.setId(id);
-        return empresa;
+        if(!repo.existsById(id))
+        {
+            return ResponseEntity.status(404).build();
+        }
+        Empresa empresa = repo.findById(id).get();
+        return ResponseEntity.ok(empresa);
     }
 
     @PostMapping("/empresas")
-    public Empresa create(@RequestBody Empresa empresa)
-    {
+    public Empresa create(@RequestBody Empresa empresa, HttpServletResponse response)
+    {   
+        try {
+            repo.save(empresa);
+        } catch (Exception e) {
+            empresa.setNome(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
         return empresa;
     }
 
     @PutMapping("/empresas/{id}")
-    public Empresa update(@PathVariable int id, @RequestBody Empresa empresa)
+    public ResponseEntity<Empresa> update(@PathVariable int id, @RequestBody Empresa empresa)
     {
-        return empresa;
+        if(!repo.existsById(id))
+        {
+            return ResponseEntity.status(404).build();
+        }
+
+        empresa.setId(id);
+        repo.save(empresa);
+
+        return ResponseEntity.ok(empresa);
     }
 
     @DeleteMapping("/empresas/{id}")
-    public Empresa delete(@PathVariable int id)
+    public ResponseEntity <Empresa> delete(@PathVariable int id)
     {
-        return new Empresa();
+        if(!repo.existsById(id))
+        {
+            return ResponseEntity.status(404).build();
+        }
+        
+        repo.deleteById(id);
+
+        return ResponseEntity.status(204).build();
     }
 
 }

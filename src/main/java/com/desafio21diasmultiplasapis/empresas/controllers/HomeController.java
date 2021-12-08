@@ -1,6 +1,7 @@
 
 package com.desafio21diasmultiplasapis.empresas.controllers;
-import com.desafio21diasmultiplasapis.model_views.Home;
+import com.desafio21diasmultiplasapis.empresas.model_views.Home;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
